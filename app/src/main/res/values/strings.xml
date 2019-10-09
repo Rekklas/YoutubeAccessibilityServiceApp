@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">YoutubeAccessibilityServiceApp</string>
+    <string name="main_text">Seems you are clicking buttons in Youtube</string>
+    <string name="accessibility_service_label">Youtube Accessibility Service</string>
 </resources>
