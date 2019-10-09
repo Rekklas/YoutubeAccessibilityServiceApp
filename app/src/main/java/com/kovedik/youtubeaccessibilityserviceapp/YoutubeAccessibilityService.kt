@@ -19,8 +19,9 @@ class YoutubeAccessibilityService : AccessibilityService() {
             Log.d(TAG, event.contentDescription.toString())
 
             // If user clicks inbox button or search button in Youtube app launch our application
-            if (event.contentDescription.toString() == INBOX_BUTTON ||
-                event.contentDescription.toString() == SEARCH_BUTTON) {
+            val button = event.contentDescription.toString()
+            if (button == INBOX_BUTTON ||
+                button == SEARCH_BUTTON) {
                 launchApp()
             }
         }
@@ -30,6 +31,7 @@ class YoutubeAccessibilityService : AccessibilityService() {
         val launchIntent =
             packageManager.getLaunchIntentForPackage("com.kovedik.youtubeaccessibilityserviceapp")
         launchIntent!!.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        launchIntent.putExtra(EXTRA_BUTTON_CLICKED, 1)
         startActivity(launchIntent)
     }
 
@@ -52,5 +54,6 @@ class YoutubeAccessibilityService : AccessibilityService() {
         private const val TAG = "AccessibilityService"
         private const val SEARCH_BUTTON = "Search"
         private const val INBOX_BUTTON = "Inbox"
+        const val EXTRA_BUTTON_CLICKED = "extra_button_clicked"
     }
 }
