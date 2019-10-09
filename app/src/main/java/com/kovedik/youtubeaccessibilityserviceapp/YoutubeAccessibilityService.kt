@@ -5,6 +5,9 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
+
+
 
 /**
  * Accessibility service that track click events from Youtube app
@@ -15,13 +18,10 @@ import android.view.accessibility.AccessibilityEvent
 class YoutubeAccessibilityService : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+        Log.d(TAG, event.toString())
         if (event?.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
-            Log.d(TAG, event.contentDescription.toString())
-
-            // If user clicks inbox button or search button in Youtube app launch our application
-            val button = event.contentDescription.toString()
-            if (button == INBOX_BUTTON ||
-                button == SEARCH_BUTTON) {
+            val nodeInfo = event.source
+            if (handleClick(nodeInfo)) {
                 launchApp()
             }
         }
@@ -29,7 +29,7 @@ class YoutubeAccessibilityService : AccessibilityService() {
 
     private fun launchApp() {
         val launchIntent =
-            packageManager.getLaunchIntentForPackage("com.kovedik.youtubeaccessibilityserviceapp")
+            packageManager.getLaunchIntentForPackage("com.google.android.youtube")
         launchIntent!!.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         launchIntent.putExtra(EXTRA_BUTTON_CLICKED, 1)
         startActivity(launchIntent)
@@ -46,14 +46,24 @@ class YoutubeAccessibilityService : AccessibilityService() {
             flags = AccessibilityServiceInfo.DEFAULT
             eventTypes = AccessibilityEvent.TYPE_VIEW_CLICKED
             feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
-            packageNames = arrayOf("com.google.android.youtube")
+            packageNames = arrayOf("com.kovedik.youtubeaccessibilityserviceapp")
         }
+    }
+
+    private fun handleClick(nodeInfo: AccessibilityNodeInfo): Boolean {
+        val list = nodeInfo.findAccessibilityNodeInfosByText("Open Youtube")
+        if (list.size > 0) {
+            for (node in list) {
+                val parent = node.parent
+                parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            }
+            return true
+        } else
+            return false
     }
 
     companion object {
         private const val TAG = "AccessibilityService"
-        private const val SEARCH_BUTTON = "Search"
-        private const val INBOX_BUTTON = "Inbox"
         const val EXTRA_BUTTON_CLICKED = "extra_button_clicked"
     }
 }
